@@ -15,6 +15,12 @@
     </a>
 </li>
 <li class="nav-item">
+    <a class="nav-link {{ $routeActive == 'services.index' ? 'active' : '' }}" href="{{ route('services.index') }}">
+        <i class="fas fa-building text-dark"></i>
+        <span class="nav-link-text">Data Layanan</span>
+    </a>
+</li>
+<li class="nav-item">
     <a class="nav-link {{ $routeActive == 'profile' ? 'active' : '' }}" href="{{ route('profile') }}">
         <i class="fas fa-user-tie text-success"></i>
         <span class="nav-link-text">Profile</span>

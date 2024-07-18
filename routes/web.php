@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfitController;
 use App\Http\Controllers\BarberController;
 use App\Http\Controllers\RouteController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TreeviewController;
 
 /*
@@ -36,4 +37,5 @@ Route::middleware('auth')->group(function() {
     }); # profile group
 
     Route::resource('barbers', BarberController::class);
+    Route::resource('services', ServiceController::class);
 });
