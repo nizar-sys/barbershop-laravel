@@ -23,6 +23,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'role' => 'admin',
                 'phone_number' => null,
+                'shift' => null,
             ],
             [
                 'name' => 'barber',
@@ -30,6 +31,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'role' => 'barber',
                 'phone_number' => '082124721853',
+                'shift' => date("H:i", strtotime("10:00")) . ' - ' . date("H:i", strtotime("18:00"))
             ],
         ];
 

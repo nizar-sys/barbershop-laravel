@@ -28,6 +28,8 @@ class RequestStoreOrUpdateUser extends FormRequest
             'email' => 'required|email|unique:users,email,' . ($this->barber ?? ''),
             'role' => 'nullable',
             'phone_number' => 'required|unique:users,phone_number,' . ($this->barber ?? ''),
+            'shift_start' => 'required|after_or_equal:08:00',
+            'shift_end' => 'required|after:shift_start',
         ];
 
         $postRules = [
@@ -60,6 +62,10 @@ class RequestStoreOrUpdateUser extends FormRequest
             'confirmation_password.same' => 'Konfirmasi password tidak sama.',
             'phone_number.required' => 'Kolom nomor telepon harus diisi.',
             'phone_number.unique' => 'Nomor telepon sudah digunakan.',
+            'shift_start.required' => 'Kolom jam mulai shift harus diisi.',
+            'shift_start.after_or_equal' => 'Jam mulai shift harus setelah atau sama dengan jam 08:00.',
+            'shift_end.required' => 'Kolom jam selesai shift harus diisi.',
+            'shift_end.after' => 'Jam selesai shift harus setelah jam mulai shift.',
         ];
     }
 }

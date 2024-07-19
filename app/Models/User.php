@@ -24,6 +24,7 @@ class User extends Authenticatable
         'role',
         'avatar',
         'phone_number',
+        'shift',
     ];
 
     /**
@@ -44,4 +45,16 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    // get shift start
+    public function getShiftStartAttribute()
+    {
+        return explode(' - ', $this->shift)[0];
+    }
+
+    // get shift end
+    public function getShiftEndAttribute()
+    {
+        return explode(' - ', $this->shift)[1];
+    }
 }

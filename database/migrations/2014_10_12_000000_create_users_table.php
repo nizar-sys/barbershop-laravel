@@ -23,6 +23,7 @@ return new class extends Migration
             $table->enum('role', ['admin', 'barber'])->default('barber');
             $table->string('avatar')->default('avatar.png');
             $table->string('phone_number')->nullable();
+            $table->string('shift')->nullable();
             $table->timestamps();
         });
     }

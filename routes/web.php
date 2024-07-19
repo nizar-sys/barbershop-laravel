@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AppointmentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DataTableController;
@@ -38,4 +39,5 @@ Route::middleware('auth')->group(function() {
 
     Route::resource('barbers', BarberController::class);
     Route::resource('services', ServiceController::class);
+    Route::resource('appointments', AppointmentController::class);
 });

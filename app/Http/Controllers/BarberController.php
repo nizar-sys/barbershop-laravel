@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Http\Requests\RequestStoreOrUpdateUser;
+use App\Models\Appointment;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class BarberController extends Controller
@@ -40,10 +42,11 @@ class BarberController extends Controller
     public function store(RequestStoreOrUpdateUser $request)
     {
         $validated = $request->validated() + [
+            'shift' => $request->shift_start . ' - ' . $request->shift_end,
             'created_at' => now(),
         ];
 
-        if($request->hasFile('avatar')){
+        if ($request->hasFile('avatar')) {
             $fileName = time() . '.' . $request->avatar->extension();
             $validated['avatar'] = $fileName;
 
@@ -92,6 +95,7 @@ class BarberController extends Controller
     public function update(RequestStoreOrUpdateUser $request, $id)
     {
         $validated = $request->validated() + [
+            'shift' => $request->shift_start . ' - ' . $request->shift_end,
             'updated_at' => now(),
         ];
 
@@ -99,7 +103,7 @@ class BarberController extends Controller
 
         $validated['avatar'] = $barber->avatar;
 
-        if($request->hasFile('avatar')){
+        if ($request->hasFile('avatar')) {
             $fileName = time() . '.' . $request->avatar->extension();
             $validated['avatar'] = $fileName;
 
@@ -107,8 +111,8 @@ class BarberController extends Controller
             $request->avatar->move(public_path('uploads/images'), $fileName);
 
             // delete old file
-            $oldPath = public_path('/uploads/images/'.$barber->avatar);
-            if(file_exists($oldPath) && $barber->avatar != 'avatar.png'){
+            $oldPath = public_path('/uploads/images/' . $barber->avatar);
+            if (file_exists($oldPath) && $barber->avatar != 'avatar.png') {
                 unlink($oldPath);
             }
         }
@@ -128,12 +132,43 @@ class BarberController extends Controller
     {
         $barber = User::findOrFail($id);
         // delete old file
-        $oldPath = public_path('/uploads/images/'.$barber->avatar);
-        if(file_exists($oldPath) && $barber->avatar != 'avatar.png'){
+        $oldPath = public_path('/uploads/images/' . $barber->avatar);
+        if (file_exists($oldPath) && $barber->avatar != 'avatar.png') {
             unlink($oldPath);
         }
         $barber->delete();
 
         return redirect(route('barbers.index'))->with('success', 'Data barber berhasil dihapus.');
+    }
+
+    public function getAvailableSlots(Request $request)
+    {
+        $barbermanId = $request->query('barberman_id');
+        $date = $request->query('date');
+
+        // Ambil shift dari database berdasarkan barberman_id
+        $barberman = User::findOrFail($barbermanId);
+        $shift = $barberman->shift; // Misalkan formatnya "10:00 - 18:00"
+
+        list($start, $end) = explode(' - ', $shift);
+        $start = new \DateTime($start);
+        $end = new \DateTime($end);
+
+        $slots = [];
+        while ($start < $end) {
+            $slots[] = $start->format('H:i');
+            $start->modify('+1 hour');
+        }
+
+        //menambahkan logika untuk mengecek slot yang sudah dibooking di database berdasarkan barberman_id dan date yang dipilih agar tidak tampil di frontend
+        $bookedSlots = Appointment::where('barber_id', $barbermanId)
+            ->where('appointment_date', $date)
+            ->get()
+            ->pluck('appointment_date')
+            ->toArray();
+
+        $slots = array_diff($slots, $bookedSlots);
+
+        return response()->json(['slots' => $slots]);
     }
 }
