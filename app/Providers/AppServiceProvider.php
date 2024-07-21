@@ -27,5 +27,9 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('currencyIdr', function ($expression) {
             return "Rp. <?php echo number_format($expression, 0, ',', '.'); ?>";
         });
+
+        Blade::directive('dateId', function ($expression) {
+            return "<?php echo \Carbon\Carbon::parse($expression)->locale('id')->translatedFormat('d F Y'); ?>";
+        });
     }
 }

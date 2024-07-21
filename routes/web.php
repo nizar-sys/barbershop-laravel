@@ -39,5 +39,7 @@ Route::middleware('auth')->group(function() {
 
     Route::resource('barbers', BarberController::class);
     Route::resource('services', ServiceController::class);
+    Route::put('/appointments/{appointment}/change-status', [AppointmentController::class, 'updateStatus'])->name('appointments.update-status');
+    Route::get('/appointments/{appointment}/invoice', [AppointmentController::class, 'printInvoice'])->name('appointments.print-invoice');
     Route::resource('appointments', AppointmentController::class);
 });

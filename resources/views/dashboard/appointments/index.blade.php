@@ -23,7 +23,7 @@
                                 <tr>
                                     <th>No</th>
                                     <th>Nama Pelanggan</th>
-                                    <th>Tanggal / Jam Reservasi</th>
+                                    <th>Tanggal</th>
                                     <th>Layanan</th>
                                     <th>Barber</th>
                                     <th>Status</th>
@@ -36,7 +36,7 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $appointment->customer_name }}</td>
                                         <td>
-                                            {{ $appointment->date }} / {{ $appointment->time }}
+                                            @dateId($appointment->appointment_date)
                                         </td>
                                         <td>
                                             {{ $appointment->service->name }}
@@ -45,29 +45,67 @@
                                             {{ $appointment->barber->name }}
                                         </td>
                                         <td>
-                                            @if ($appointment->status == 'pending')
-                                                <span class="badge badge-warning">{{ $appointment->status }}</span>
-                                            @elseif ($appointment->status == 'selesai')
-                                                <span class="badge badge-success">{{ $appointment->status }}</span>
-                                            @else
-                                                <span class="badge badge-danger">{{ $appointment->status }}</span>
-                                            @endif
-                                        <td class="d-flex jutify-content-center">
-                                            <a href="{{ route('appointments.edit', $appointment->id) }}"
-                                                class="btn btn-sm btn-warning"><i class="fas fa-pencil-alt"></i></a>
-                                            <form id="delete-form-{{ $appointment->id }}"
-                                                action="{{ route('appointments.destroy', $appointment->id) }}"
-                                                class="d-none" method="post">
+                                            <form data-appointment-id="{{ $appointment->id }}"
+                                                action="{{ route('appointments.update-status', $appointment->id) }}"
+                                                method="POST">
                                                 @csrf
-                                                @method('DELETE')
+                                                @method('PUT')
+                                                @if (in_array($appointment->status, ['pending', 'disetujui']))
+                                                    <div
+                                                        class="badge badge-{{ $appointment->status == 'pending' ? 'warning' : 'info' }}">
+                                                        <select name="status" class="bg-transparent text-dark"
+                                                            onchange="changeStatus(this)"
+                                                            data-prev-status="{{ $appointment->status }}">
+                                                            @if ($appointment->status == 'pending')
+                                                                <option value="pending"
+                                                                    {{ $appointment->status == 'pending' ? 'selected' : '' }}>
+                                                                    Pending</option>
+                                                            @endif
+                                                            <option value="disetujui"
+                                                                {{ $appointment->status == 'disetujui' ? 'selected' : '' }}>
+                                                                Terima</option>
+                                                            @if ($appointment->status == 'pending')
+                                                                <option value="ditolak">Tolak</option>
+                                                            @elseif ($appointment->status == 'disetujui')
+                                                                <option value="selesai">Selesai</option>
+                                                            @endif
+                                                        </select>
+                                                    </div>
+                                                @elseif ($appointment->status == 'ditolak')
+                                                    <span class="badge badge-danger">{{ $appointment->status }}</span>
+                                                @elseif ($appointment->status == 'selesai')
+                                                    <span class="badge badge-success">{{ $appointment->status }}</span>
+                                                @endif
                                             </form>
-                                            <button onclick="deleteForm('{{ $appointment->id }}')"
-                                                class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                        <td class="d-flex justify-content-center">
+                                            @if ($appointment->status == 'pending')
+                                                <a href="{{ route('appointments.edit', $appointment->id) }}"
+                                                    class="btn btn-sm btn-warning">
+                                                    <i class="fas fa-pencil-alt"></i>
+                                                </a>
+                                                <form id="delete-form-{{ $appointment->id }}"
+                                                    action="{{ route('appointments.destroy', $appointment->id) }}"
+                                                    class="d-none" method="post">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                </form>
+                                                <button onclick="deleteForm('{{ $appointment->id }}')"
+                                                    class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            @elseif($appointment->status == 'selesai')
+                                                <a target="__blank"
+                                                    href="{{ route('appointments.print-invoice', $appointment->id) }}"
+                                                    class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-file-pdf"></i> Print
+                                                </a>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center">Data tidak ditemukan</td>
+                                        <td colspan="7" class="text-center">Belum ada data reservasi</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -111,6 +149,32 @@
                     $(`#delete-form-${id}`).submit()
                 }
             })
+        }
+    </script>
+    <script>
+        function changeStatus(select) {
+            const $select = $(select);
+            const currentStatus = $select.val();
+            const prevStatus = $select.attr('data-prev-status');
+
+            const confirmationText = `Apakah Anda yakin ingin mengubah status menjadi ${currentStatus}?`;
+
+            Swal.fire({
+                title: 'Konfirmasi',
+                text: confirmationText,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Lanjut!',
+                cancelButtonText: 'Batal',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $select.closest('form').submit();
+                } else {
+                    $select.val(prevStatus);
+                }
+            });
         }
     </script>
 @endsection
