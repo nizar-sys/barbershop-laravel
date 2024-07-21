@@ -3,13 +3,10 @@
 use App\Http\Controllers\AppointmentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\DataTableController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ProfitController;
 use App\Http\Controllers\BarberController;
 use App\Http\Controllers\RouteController;
 use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\TreeviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,7 +20,8 @@ use App\Http\Controllers\TreeviewController;
 */
 
 # ------ Unauthenticated routes ------ #
-Route::get('/', [AuthenticatedSessionController::class, 'create']);
+Route::get('/', [RouteController::class, 'index']);
+Route::post('/create-appointment', [RouteController::class, 'createAppointment'])->name('create-appointment');
 require __DIR__.'/auth.php';
 
 
